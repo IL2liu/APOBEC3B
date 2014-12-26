@@ -59,7 +59,10 @@ install_github("MetaGx", username="bhaibeka", ref="master")
 ```
 
 Note that you may need to install Perl3 and its module Text::CSV XS for the WriteXLS package to write xls file; once Perl is installed in your system, use the following command to install the Text::CSV XS module through CPAN:
+
+````
 cpan Text/CSV_XS.pm
+````
 
 Lastly, follow the instructions on the CBS website to properly install the jetset package or use the following commands in R:
 
@@ -70,12 +73,12 @@ install.packages("jetset_1.4.0.tar.gz", repos=NULL, type="source")
 ````
 
 Once the packages are installed, uncompress the archive provided as Supplementary data accompanying the manuscript5. This should create a directory on the file system containing the following files:
-apobec .pipeline.R Master script running all the scripts listed above to generate the analysis results.
-apobec data TCGA.R Script to to downlaod and format TCGA data.
-apobec data METABRIC.R Script to to downlaod and format METABRIC data.
-apobec analysis.R Script generating all the figures and tables reported in the manuscript.
-gsea2-2.1.0.jar GSEA java executable; it can also be downloaded from the GSEA website6.
-c5.all.v4.0.entrez.gmt DefinitionofgenesetsbasedonEntrezGeneIDs;itcanalsobedown- loaded from the GSEA website7.
+* apobec .pipeline.R Master script running all the scripts listed above to generate the analysis results.
+* apobec data TCGA.R Script to to downlaod and format TCGA data.
+* apobec data METABRIC.R Script to to downlaod and format METABRIC data.
+* apobec analysis.R Script generating all the figures and tables reported in the manuscript.
+* gsea2-2.1.0.jar GSEA java executable; it can also be downloaded from the GSEA website.
+* c5.all.v4.0.entrez.gmt Definition of gene sets based on EntrezGene IDs;it can also be downloaded from the GSEA website.
 
 All the files required to run the automated analysis pipeline are now in place. It is worth noting that raw gene expression and drug sensitivity data are voluminous, please ensure that at least 5GB of storage are available.
 
