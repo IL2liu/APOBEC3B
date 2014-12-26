@@ -761,9 +761,7 @@ if (!file.exists(myfn)) {
     myx <- names(sbt2)[!is.na(sbt2) & is.element(sbt2, sbtoi[[j]])]
     myx <- intersect(myx, iix)
     yy <- cnvcalls
-    # levels(yy)[levels(yy) == 1] <- NA
-    # yy <- as.numeric(yy)
-    names(yy) <- names(cnvcalls)
+	 levels(yy) <- c(0, 1, 2)
     ## parallel execution
     splitix <- parallel::splitIndices(nx=ncol(dataset$ge), ncl=nbcore)
     splitix <- splitix[sapply(splitix, length) > 0]
@@ -775,7 +773,7 @@ if (!file.exists(myfn)) {
           tempff <- file.path(gsea.out.rank, basename(tempfile(pattern="res_", tmpdir="", fileext=".tmp")))
           sink(file=tempff, type="output")
           ## reference is wild type
-          y <- relevel(y, ref=3)
+          y <- relevel(y, ref="2")
           res1 <- nnet::multinom(y ~ x)
           rr <- summary(res1)
           if ("x" %in% colnames(rr$coefficients)) {
@@ -988,7 +986,7 @@ if (!all(is.na(mutations[ "HYPERMUTATION"]))) {
 		  myx <- names(sbt2)[!is.na(sbt2) & is.element(sbt2, sbtoi[[j]])]
 		  myx <- intersect(myx, iix)
 		  yy <- cnvcalls
-		  names(yy) <- names(cnvcalls)
+		  levels(yy) <- c(0, 1, 2)
 		  zz <- mutations[ , "HYPERMUTATION"]
 		  zz <- as.numeric(zz)
 		  names(zz) <- rownames(mutations)
@@ -1003,7 +1001,7 @@ if (!all(is.na(mutations[ "HYPERMUTATION"]))) {
 		        tempff <- file.path(gsea.out.rank, basename(tempfile(pattern="res_", tmpdir="", fileext=".tmp")))
 		        sink(file=tempff, type="output")
 		        ## reference is wild type
-		        y <- relevel(y, ref=3)
+		        y <- relevel(y, ref="2")
 		        res1 <- nnet::multinom(y ~ x + z)
 		        rr <- summary(res1)
 		        if ("x" %in% colnames(rr$coefficients)) {
