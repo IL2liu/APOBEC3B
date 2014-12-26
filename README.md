@@ -3,22 +3,23 @@ APOBEC3B
 
 Analysis pipeline for 
 
-APOBEC3B expression in breast cancer reflects cellular proliferation, while a deletion polymorphism is associated with immune activation
+**_APOBEC3B expression in breast cancer reflects cellular proliferation, while a deletion polymorphism is associated with immune activation_**
 
 David W. Cescon\*, Benjamin Haibe-Kains\*, Tak W. Mak
 
 \*Co-first authors
 
-**Full Reproducibility of the Analysis Results**
+Please cite: _APOBEC3B expression in breast cancer reflects cellular proliferation, while a deletion polymorphism is associated with immune activation_, Cescon DW, Haibe-Kains B, Mak TW, 2014
+
+# Full Reproducibility of the Analysis Results
 
 We will describe how to fully reproduce the figures and tables reported in the main manuscript. We automated the analysis pipeline so that minimal manual interaction is required to reproduce our results. To do this, one must simply:
 
 1. Set up the software environment
-
 2. Run the R scripts
 
 
-**Set up the software environment**
+## Set up the software environment
 
 We developed and tested our analysis pipeline using R running on linux and Mac OSX platforms.
 
@@ -35,6 +36,7 @@ All these packages are available on CRAN or Bioconductor.
 
 Run the following commands in a R session to install all the required packages:
 
+```
 source("http://bioconductor.org/biocLite.R")
 biocLite(c("AnnotationDbi", "Biobase",
     "BiocGenerics", "biomaRt", "bitops", "cgdsr",
@@ -45,22 +47,27 @@ biocLite(c("AnnotationDbi", "Biobase",
     "RSQLite", "SnowballC" "survcomp", "survival", "WriteXLS",
     "xtable", "devtools")
 )
+````
 
 The latest version of MetaGx, survcomp and gene can be installed using the following com- mands:
 
+```
 library(devtools)
 install_github("survcomp", username="bhaibeka", ref="master")
 install_github("genefu", username="bhaibeka", ref="master")
 install_github("MetaGx", username="bhaibeka", ref="master")
+```
 
 Note that you may need to install Perl3 and its module Text::CSV XS for the WriteXLS package to write xls file; once Perl is installed in your system, use the following command to install the Text::CSV XS module through CPAN:
 cpan Text/CSV_XS.pm
 
 Lastly, follow the instructions on the CBS website to properly install the jetset package or use the following commands in R:
 
+```
 download.file(url="http://www.cbs.dtu.dk/biotools/jetset/current/jetset_1.4.0.tar.gz",
  destfile="jetset_1.4.0.tar.gz")
 install.packages("jetset_1.4.0.tar.gz", repos=NULL, type="source")
+````
 
 Once the packages are installed, uncompress the archive provided as Supplementary data accompanying the manuscript5. This should create a directory on the file system containing the following files:
 apobec .pipeline.R Master script running all the scripts listed above to generate the analysis results.
@@ -72,25 +79,33 @@ c5.all.v4.0.entrez.gmt DefinitionofgenesetsbasedonEntrezGeneIDs;itcanalsobedown-
 
 All the files required to run the automated analysis pipeline are now in place. It is worth noting that raw gene expression and drug sensitivity data are voluminous, please ensure that at least 5GB of storage are available.
 
-**Run the R scripts**
+## Run the R scripts
 
 Open a terminal window and go to the apobec directory. You can easily run the analysis pipeline either in batch mode or in a R session. Before running the pipeline you can specify the number of CPU cores you want to allocate to the analysis (by default only 1 CPU core will be used). To do so, open the script apobec pipeline.R and update line #33:
 
+```
 nbcore <- 4
+````
 
 to allocate four CPU cores for instance.
 
 To run the full pipeline in batch mode, simply type the following command:
 
+```
 R CMD BATCH apobec pipeline.R Rout &
+````
 
 The progress of the pipeline could be monitored using the following command:
 
+```
 tail -f Rout
+````
 
 To run the full analysis pipeline in an R session, simply type the following command:
 
+```
 source("apobec pipeline.R")
+````
 
 Key messages will be displayed to monitor the progress of the analysis.
 
