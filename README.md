@@ -72,11 +72,13 @@ download.file(url="http://www.cbs.dtu.dk/biotools/jetset/current/jetset_1.4.0.ta
 install.packages("jetset_1.4.0.tar.gz", repos=NULL, type="source")
 ````
 
-Once the packages are installed, uncompress the archive provided as Supplementary data accompanying the manuscript5. This should create a directory on the file system containing the following files:
+Once the packages are installed, uncompress the archive provided as Supplementary data accompanying the manuscript. This should create a directory on the file system containing the following files:
 * apobec .pipeline.R Master script running all the scripts listed above to generate the analysis results.
 * apobec data TCGA.R Script to to downlaod and format TCGA data.
 * apobec data METABRIC.R Script to to downlaod and format METABRIC data.
-* apobec analysis.R Script generating all the figures and tables reported in the manuscript.
+* apobec analysis.R Script generating all the figures and tables reported in the manuscript. 
+
+These files should be downloaded and pu in a directory called 'gsea':
 * gsea2-2.1.0.jar GSEA java executable; it can also be downloaded from the GSEA website.
 * c5.all.v4.0.entrez.gmt Definition of gene sets based on EntrezGene IDs;it can also be downloaded from the GSEA website.
 
