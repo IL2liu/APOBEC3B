@@ -5,9 +5,9 @@ Analysis pipeline for
 
 APOBEC3B expression in breast cancer reflects cellular proliferation, while a deletion polymorphism is associated with immune activation
 
-David W. Cescon*, Benjamin Haibe-Kains*, Tak W. Mak
+David W. Cescon\*, Benjamin Haibe-Kains\*, Tak W. Mak
 
-*Co-first authors
+\*Co-first authors
 
 **Full Reproducibility of the Analysis Results**
 
