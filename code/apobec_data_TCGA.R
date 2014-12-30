@@ -218,6 +218,12 @@ if (!file.exists(myfn)) {
   data.clin <- data.frame(data.clin, tt)
   data.clin[ , "t.rfs"] <- (as.numeric(data.clin[ , "t.rfs"]) / 12) * 365
   data.clin[ , "t.os"] <- (as.numeric(data.clin[ , "t.os"]) / 12) * 365
+  ## add binarized age and size
+  age.bin <- factor(as.numeric(data.clin[ , "age"]) > 50)
+  levels(age.bin) <- c("<=50", ">50")
+  size.bin <- factor(as.numeric(data.clin[ , "size"]) > 2)
+  levels(size.bin) <- c("<=2", ">2")
+  data.clin <- data.frame(data.clin, "age.bin"=age.bin, "size.bin"=size.bin)
 
   ## merge all data
   pid <- sort(fold(union, rownames(data.ge), rownames(data.cnv), rownames(data.cna), rownames(data.mut), rownames(data.clin)))

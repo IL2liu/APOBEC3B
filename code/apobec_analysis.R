@@ -134,7 +134,7 @@ if (!file.exists(myfn)) {
 	file.create(myfn)
 }	
 
-## association with proliferation-related genes
+## association with subtypes
 pdf(file.path(goidir, sprintf("subtype_apobec_exprs_%s.pdf", dataset.name)), height=6, width=8)
 for (i in 1:length(goi)) {
   x <- dataset$subtype
@@ -199,6 +199,7 @@ for (ii in 1:length(bc.signatures)) {
 }
 dev.off()
 
+
 ## association with age
 x <- as.numeric(dataset$clin[ , "age"])
 names(x) <- rownames(dataset$clin)
@@ -249,7 +250,7 @@ if (sum(complete.cases(x)) >= 3) {
 
 ## association with node, grade, er, her2
 iix <- intersect(rownames(dataset$clin), names(a.exprs))
-cn <- c("node", "grade", "er", "her2")
+cn <- c("node", "grade", "er", "her2", "age.bin", "size.bin")
 for (i in 1:length(cn)) {
   x <- dataset$clin[ , cn[i]]
   x[!is.na(x) & x == "NA"] <- NA
@@ -279,8 +280,46 @@ for (i in 1:length(cn)) {
     dev.off()
   }
 }
+## combined boxplot
+pdf(file.path(goidir, sprintf("clin_apobec_exprs_%s.pdf", dataset.name)), height=7, width=ceiling(length(cn)) * 3)
+for (ii in 1:length(goi)) {
+	if (goi[[ii]] %in% colnames(dataset$ge)) {
+	  a.exprs <- dataset$ge[ , goi[[ii]]]
+	  for (j in 1:length(sbtoi)) {
+		myx <- names(sbt2)[!is.na(sbt2) & is.element(sbt2, sbtoi[[j]])]
+		myx <- intersect(myx, iix)
+		## build a list of data points for each category
+		rr.all <- NULL
+		for (i in 1:length(cn)) {
+			x <- dataset$clin[ , cn[i]]
+			x[!is.na(x) & (x == "NA" | x == "")] <- NA
+			if (!is.factor(x)) {
+				x <- factor(x, levels=c(sort(as.character(unique(x)))))
+			}
+			names(x) <- rownames(dataset$clin)
+			if (sum(complete.cases(x[myx])) >= 3) {
+				ll <- levels(x)
+				ixx <- table(x)[ll] > 0
+				ll <- ll[!is.na(ixx) & ixx > 0]
+				rr <- lapply(ll, function (x, y, z) {
+					return (y[!is.na(z) & z == x])
+				}, y=a.exprs[myx], z=x[myx])
+				names(rr) <- paste(cn[i], ll, sep=".")
+				rr.all <- c(rr.all, list(NA), rr)
+			}
+		}
+      # wt <- kruskal.test(a.exprs[myx] ~ x[myx])
+		par(xaxt="n", las=1, mar=c(7, 4, 3, 1) + 0.1)
+      mp <- boxplot(rr.all, outline=FALSE, ylab=sprintf("%s expression", names(goi)[ii]), xlab="Clinical parameters", cex.main=0.9, main=sprintf("%s in %s", names(goi)[ii], names(sbtoi)[j]))
+	   axis(1, at=seq(1, length(rr.all), by=1), labels=FALSE)
+	   text(x=(1:length(mp$names)) + 0.25, y=par("usr")[3] - (par("usr")[4] * 0.01), pos=2, labels=toupper(mp$names), srt=45, xpd=NA, cex=0.8, font=1)
+	}
+ }
+}
+dev.off()
 
 ## association with mutations
+iix <- intersect(rownames(dataset$ge), rownames(mutations))
 pdf(file.path(goidir, sprintf("mutations_apobec_exprs_%s.pdf", dataset.name)), height=15, width=ceiling(length(sbtoi) / 3) * 5)
 for (ii in 1:ncol(mutations)) {
   x <- mutations[ , ii]
@@ -309,6 +348,110 @@ for (ii in 1:ncol(mutations)) {
   }
 }
 dev.off()
+## combined boxplot per mutation type
+mutn <- c("TP53", "PIK3CA", "PIK3CA.E542K", "PIK3CA.E545K")
+mutn <- mutn[mutn %in% colnames(mutations)]
+if (length(mutn) > 0) {
+	
+	pdf(file.path(goidir, sprintf("mutations2_apobec_exprs_%s.pdf", dataset.name)), height=3, width=ceiling(length(mutn) * 2.5))
+	for (ii in 1:length(goi)) {
+		if (goi[ii] %in% colnames(dataset$ge)) {
+			a.exprs <- dataset$ge[ , goi[ii]]
+			# par(mfrow=c(3, ceiling(length(sbtoi) / 3)))
+			rr.all3 <- mycol3 <- NULL
+			for (i in 1:length(mutn)) {
+				x <- mutations[ , mutn[i]]
+				x[!is.na(x) & (x == "NA" | x == "")] <- NA
+				if (!is.factor(x)) {
+					x <- factor(x, levels=c(sort(as.character(unique(x)))))
+				}
+				levels(x) <- c("WT", "MUT")
+				names(x) <- rownames(mutations)
+				rr.all2 <- mycol2 <- NULL
+				for (k in 1:length(levels(x))) {
+					rr.all <- NULL
+					for (j in 1:length(sbtoi)) {
+						iix2 <- names(sbt2)[!is.na(sbt2) & is.element(sbt2, sbtoi[[j]])]
+						iix3 <- names(x)[!is.na(levels(x)) & levels(x) == levels(x)[k]]
+						myx <- fold(intersect, iix3, iix2, iix)
+						## build a list of data points for each category
+						if (sum(complete.cases(x[myx])) >= 3) {
+							rr <- list(a.exprs[myx])
+							names(rr) <- paste(mutn[i], levels(x)[k], names(sbtoi)[j], sep=".")
+						} else {
+							rr <- NA
+						}
+						rr.all <- c(rr.all, rr)
+					}
+					rr.all2 <- c(rr.all2, list(NA), rr.all)
+					mycol2 <- c(mycol2, "white", sbtcol)
+				}
+				rr.all3 <- c(rr.all3, list(NA), rr.all2)
+				mycol3 <- c(mycol3, "white", mycol2)	
+			}
+			rr.all3 <- rr.all3[-c(1:2)]
+			mycol3 <- mycol3[-c(1:2)]
+			# wt <- kruskal.test(a.exprs[myx] ~ x[myx])
+			par(xaxt="n", las=1, mar=c(7, 4, 3, 1) + 0.1, cex=0.7)
+			mp <- boxplot(rr.all3, outline=FALSE, ylab=sprintf("%s expression", names(goi)[ii]), xlab="", cex.main=0.9, main=sprintf("%s", names(goi)[ii]), col=mycol3)
+			axis(1, at=seq(1, length(rr.all3), by=1), labels=FALSE)
+			text(x=(1:length(mp$names)) + 0.25, y=par("usr")[3] - (par("usr")[4] * 0.01), pos=2, labels=toupper(mp$names), srt=45, xpd=NA, cex=0.7, font=1)
+		}
+	}
+	dev.off()
+
+	## combined boxplot per mutation
+	
+	pdf(file.path(goidir, sprintf("mutations3_apobec_exprs_%s.pdf", dataset.name)), height=3, width=ceiling(length(mutn) * 2.5))
+	for (ii in 1:length(goi)) {
+		if (goi[ii] %in% colnames(dataset$ge)) {
+			a.exprs <- dataset$ge[ , goi[ii]]
+			# par(mfrow=c(3, ceiling(length(sbtoi) / 3)))
+			rr.all3 <- mycol3 <- NULL
+			for (i in 1:length(mutn)) {
+				x <- mutations[ , mutn[i]]
+				x[!is.na(x) & (x == "NA" | x == "")] <- NA
+				if (!is.factor(x)) {
+					x <- factor(x, levels=c(sort(as.character(unique(x)))))
+				}
+				levels(x) <- c("WT", "MUT")
+				names(x) <- rownames(mutations)
+				rr.all2 <- mycol2 <- NULL
+				for (j in 1:length(sbtoi)) {
+					rr.all <- NULL
+					for (k in 1:length(levels(x))) {
+						iix2 <- names(sbt2)[!is.na(sbt2) & is.element(sbt2, sbtoi[[j]])]
+						iix3 <- names(x)[!is.na(x) & x == levels(x)[k]]
+						myx <- fold(intersect, iix3, iix2, iix)
+						## build a list of data points for each category
+						if (sum(complete.cases(x[myx])) >= 3) {
+							rr <- list(a.exprs[myx])
+							names(rr) <- paste(mutn[i], levels(x)[k], names(sbtoi)[j], sep=".")
+						} else {
+							rr <- -1
+						}
+						rr.all <- c(rr.all, rr)
+					}
+					rr.all2 <- c(rr.all2, list(NA), rr.all)
+					mycol2 <- c(mycol2, "white", rep(sbtcol[j], each=length(levels(x))))
+				}
+				rr.all3 <- c(rr.all3, list(NA), rr.all2)
+				mycol3 <- c(mycol3, "white", mycol2)	
+			}
+			rr.all3 <- rr.all3[-c(1:2)]
+			mycol3 <- mycol3[-c(1:2)]
+			myx <- sapply(rr.all3, function (x) { return (!(!is.na(x[1]) & x[1] == -1))})
+			rr.all3 <- rr.all3[myx]
+			mycol3 <- mycol3[myx]
+			# wt <- kruskal.test(a.exprs[myx] ~ x[myx])
+			par(xaxt="n", las=1, mar=c(7, 4, 3, 1) + 0.1, cex=0.7)
+			mp <- boxplot(rr.all3, outline=FALSE, ylab=sprintf("%s expression", names(goi)[ii]), xlab="", cex.main=0.9, main=sprintf("%s", names(goi)[ii]), col=mycol3)
+			axis(1, at=seq(1, length(rr.all3), by=1), labels=FALSE)
+			text(x=(1:length(mp$names)) + 0.25, y=par("usr")[3] - (par("usr")[4] * 0.01), pos=2, labels=toupper(mp$names), srt=45, xpd=NA, cex=0.7, font=1)
+		}
+	}
+	dev.off()
+}
 
 
 ## Association with grade independently of subtypes (multivariate linear regression model with A3B expression + grade + subtypes)
@@ -485,6 +628,9 @@ for (ii in 1:length(goi.prolif)) {
 goidir <- file.path(saveres, dataset.name, "cnvcalls")
 if (!file.exists(goidir)) { dir.create(goidir, showWarnings=FALSE, recursive=TRUE) }
 
+
+yylim <- floor(range(dataset$ge[ , intersect(c(goi, goi.prolif), colnames(dataset$ge))], na.rm=TRUE))
+
 ## correlation between apobec cnv calls and expression of apobec genes
 pdf(file.path(goidir, sprintf("apobec_cnvcalls_%s.pdf", dataset.name)), height=15, width=ceiling(length(sbtoi) / 3) * 5)
 xx <- as.character(cnvcalls)
@@ -510,6 +656,45 @@ for (i in 1:length(goi)) {
       } else { wt <- list("p.value"=NA) }
     }
   }
+}
+dev.off()
+## combined boxplot per subtypes
+
+pdf(file.path(goidir, sprintf("apobec3_cnvcalls_%s.pdf", dataset.name)), height=3, width=4)
+for (ii in 1:length(goi)) {
+	if (goi[ii] %in% colnames(dataset$ge)) {
+		a.exprs <- dataset$ge[ , goi[ii]]
+		x <- cnvcalls
+		x[!is.na(x) & (x == "NA" | x == "")] <- NA
+		rr.all2 <- mycol2 <- NULL
+		for (j in 1:length(sbtoi)) {
+			rr.all <- NULL
+			for (k in 1:length(levels(x))) {
+				iix2 <- names(sbt2)[!is.na(sbt2) & is.element(sbt2, sbtoi[[j]])]
+				iix3 <- names(x)[!is.na(x) & x == levels(x)[k]]
+				myx <- fold(intersect, iix3, iix2, iix)
+				## build a list of data points for each category
+				if (sum(complete.cases(x[myx])) >= 3) {
+					rr <- list(a.exprs[myx])
+					names(rr) <- paste(levels(x)[k], names(sbtoi)[j], sep=".")
+				} else {
+					rr <- -1
+				}
+				rr.all <- c(rr.all, rr)
+			}
+			rr.all2 <- c(rr.all2, list(NA), rr.all)
+			mycol2 <- c(mycol2, "white", rep(sbtcol[j], each=length(levels(x))))
+		}
+		rr.all2 <- rr.all2[-c(1)]
+		mycol2 <- mycol2[-c(1)]
+		myx <- sapply(rr.all2, function (x) { return (!(!is.na(x[1]) & x[1] == -1))})
+		rr.all2 <- rr.all2[myx]
+		mycol2 <- mycol2[myx]
+		par(xaxt="n", las=1, mar=c(7, 4, 3, 1) + 0.1, cex=0.7)
+		mp <- boxplot(rr.all2, outline=FALSE, ylab=sprintf("%s expression", names(goi)[ii]), xlab="", cex.main=0.9, main=sprintf("%s", names(goi)[ii]), col=mycol2, ylim=yylim)
+		axis(1, at=seq(1, length(rr.all2), by=1), labels=FALSE)
+		text(x=(1:length(mp$names)) + 0.25, y=par("usr")[3] - (par("usr")[4] * 0.01), pos=2, labels=toupper(mp$names), srt=45, xpd=NA, cex=0.7, font=1)
+	}
 }
 dev.off()
 
@@ -540,6 +725,44 @@ for (i in 1:length(goi.prolif)) {
   }
 }
 dev.off()
+## combined boxplot per subtypes
+pdf(file.path(goidir, sprintf("prolif3_cnvcalls_%s.pdf", dataset.name)), height=3, width=4)
+for (ii in 1:length(goi.prolif)) {
+	if (goi.prolif[ii] %in% colnames(dataset$ge)) {
+		a.exprs <- dataset$ge[ , goi.prolif[ii]]
+		x <- cnvcalls
+		x[!is.na(x) & (x == "NA" | x == "")] <- NA
+		rr.all2 <- mycol2 <- NULL
+		for (j in 1:length(sbtoi)) {
+			rr.all <- NULL
+			for (k in 1:length(levels(x))) {
+				iix2 <- names(sbt2)[!is.na(sbt2) & is.element(sbt2, sbtoi[[j]])]
+				iix3 <- names(x)[!is.na(x) & x == levels(x)[k]]
+				myx <- fold(intersect, iix3, iix2, iix)
+				## build a list of data points for each category
+				if (sum(complete.cases(x[myx])) >= 3) {
+					rr <- list(a.exprs[myx])
+					names(rr) <- paste(levels(x)[k], names(sbtoi)[j], sep=".")
+				} else {
+					rr <- -1
+				}
+				rr.all <- c(rr.all, rr)
+			}
+			rr.all2 <- c(rr.all2, list(NA), rr.all)
+			mycol2 <- c(mycol2, "white", rep(sbtcol[j], each=length(levels(x))))
+		}
+		rr.all2 <- rr.all2[-c(1)]
+		mycol2 <- mycol2[-c(1)]
+		myx <- sapply(rr.all2, function (x) { return (!(!is.na(x[1]) & x[1] == -1))})
+		rr.all2 <- rr.all2[myx]
+		mycol2 <- mycol2[myx]
+		par(xaxt="n", las=1, mar=c(7, 4, 3, 1) + 0.1, cex=0.7)
+		mp <- boxplot(rr.all2, outline=FALSE, ylab=sprintf("%s expression", names(goi.prolif)[ii]), xlab="", cex.main=0.9, main=sprintf("%s", names(goi.prolif)[ii]), col=mycol2, ylim=yylim)
+		axis(1, at=seq(1, length(rr.all2), by=1), labels=FALSE)
+		text(x=(1:length(mp$names)) + 0.25, y=par("usr")[3] - (par("usr")[4] * 0.01), pos=2, labels=toupper(mp$names), srt=45, xpd=NA, cex=0.7, font=1)
+	}
+}
+dev.off()
 
 ## signature scores
 pdf(file.path(goidir, sprintf("signatures_cnvcalls_%s.pdf", dataset.name)), height=15, width=ceiling(length(sbtoi) / 3) * 5)
@@ -565,6 +788,42 @@ for (ii in 1:length(bc.signatures)) {
       } else { wt <- list("p.value"=NA) }
     }
   }
+}
+dev.off()
+## combined boxplot per subtypes
+pdf(file.path(goidir, sprintf("signatures3_cnvcalls_%s.pdf", dataset.name)), height=3, width=4)
+for (ii in 1:length(bc.signatures)) {
+	a.exprs <- bc.signatures[[ii]]$score
+	x <- cnvcalls
+	x[!is.na(x) & (x == "NA" | x == "")] <- NA
+	rr.all2 <- mycol2 <- NULL
+	for (j in 1:length(sbtoi)) {
+		rr.all <- NULL
+		for (k in 1:length(levels(x))) {
+			iix2 <- names(sbt2)[!is.na(sbt2) & is.element(sbt2, sbtoi[[j]])]
+			iix3 <- names(x)[!is.na(x) & x == levels(x)[k]]
+			myx <- fold(intersect, iix3, iix2, iix)
+			## build a list of data points for each category
+			if (sum(complete.cases(x[myx])) >= 3) {
+				rr <- list(a.exprs[myx])
+				names(rr) <- paste(levels(x)[k], names(sbtoi)[j], sep=".")
+			} else {
+				rr <- -1
+			}
+			rr.all <- c(rr.all, rr)
+		}
+		rr.all2 <- c(rr.all2, list(NA), rr.all)
+		mycol2 <- c(mycol2, "white", rep(sbtcol[j], each=length(levels(x))))
+	}
+	rr.all2 <- rr.all2[-c(1)]
+	mycol2 <- mycol2[-c(1)]
+	myx <- sapply(rr.all2, function (x) { return (!(!is.na(x[1]) & x[1] == -1))})
+	rr.all2 <- rr.all2[myx]
+	mycol2 <- mycol2[myx]
+	par(xaxt="n", las=1, mar=c(7, 4, 3, 1) + 0.1, cex=0.7)
+	mp <- boxplot(rr.all2, outline=FALSE, ylab=sprintf("%s expression", names(bc.signatures)[ii]), xlab="", cex.main=0.9, main=sprintf("%s", names(bc.signatures)[ii]), col=mycol2)
+	axis(1, at=seq(1, length(rr.all2), by=1), labels=FALSE)
+	text(x=(1:length(mp$names)) + 0.25, y=par("usr")[3] - (par("usr")[4] * 0.01), pos=2, labels=toupper(mp$names), srt=45, xpd=NA, cex=0.7, font=1)
 }
 dev.off()
 

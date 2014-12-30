@@ -69,6 +69,7 @@ fold <- function(f, x, y, ...){
 sbtm <- "scmod2"
 sbtoi <- list("Global"=c("Basal", "Her2", "LumB", "LumA"), "Basal"="Basal", "Her2"="Her2", "Luminals"=c("LumB", "LumA"), "LuminalB"="LumB", "LuminalA"="LumA")
 # sbtoi <- list("Global"=c("ER-/HER2-", "HER2+", "ER+/HER2- High Prolif", "ER+/HER2- Low Prolif"), "Basal"="ER-/HER2-", "Her2"="HER2+", "Luminals"=c("ER+/HER2- High Prolif", "ER+/HER2- Low Prolif"), "LuminalB"="ER+/HER2- High Prolif", "LuminalA"="ER+/HER2- Low Prolif")
+sbtcol <- rainbow(length(sbtoi), alpha=0.6)
 
 ## create directory to save the results
 saveres <- sprintf("saveres_%s", sbtm)

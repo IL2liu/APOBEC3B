@@ -20,12 +20,19 @@ if (!file.exists(myfn)) {
   annot <-  Biobase::fData(metabric)
   data.clin <- Biobase::pData(metabric)
   colnames(data.clin) <- gsub(" ", ".", colnames(data.clin))
+  
   ## select tumor tissues
   tix <- !is.na(data.clin[ , "tissue"]) & data.clin[ , "tissue"] == "TUMOR"
   data.ge.normal <- data.ge[!tix, , drop=FALSE]
   data.clin.normal <- data.clin[!tix, , drop=FALSE]
   data.ge <- data.ge[tix, , drop=FALSE]
   data.clin <- data.clin[tix, , drop=FALSE]
+  ## add binarized age and size
+  age.bin <- factor(as.numeric(data.clin[ , "age"]) > 50)
+  levels(age.bin) <- c("<=50", ">50")
+  size.bin <- factor(as.numeric(data.clin[ , "size"]) > 2)
+  levels(size.bin) <- c("<=2", ">2")
+  data.clin <- data.frame(data.clin, "age.bin"=age.bin, "size.bin"=size.bin)
   ## revert sample names to original metabric identifiers
   rownames(data.ge) <- rownames(data.clin) <- gsub("MB", "MB-", as.character(data.clin[ , "id"]))
   ## save data
