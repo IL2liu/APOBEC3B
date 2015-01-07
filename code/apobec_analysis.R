@@ -97,6 +97,8 @@ for (i in 1:length(cn)) {
 goidir <- file.path(saveres, dataset.name, "exprs")
 if (!file.exists(goidir)) { dir.create(goidir, showWarnings=FALSE, recursive=TRUE) }
 
+yylim <- floor(range(dataset$ge[ , intersect(c(goi, goi.prolif), colnames(dataset$ge))], na.rm=TRUE))
+
 #################################################
 ## subtype-specific co-expression  analysis
 #################################################
@@ -142,7 +144,7 @@ for (i in 1:length(goi)) {
     a.exprs <- dataset$ge[ , goi[i]]
     iix <- intersect(names(x), names(a.exprs))
     kwt <- kruskal.test(a.exprs[iix] ~ x[iix])
-    boxplot(a.exprs[iix] ~ x[iix], ylab=sprintf("%s expression", names(goi)[i]), sub=sprintf("Kruskal-Walis test p-value = %.1E", kwt$p.value), main=sprintf("%s vs subtypes in %s\n%i patients", names(goi)[i], dataset.name, length(iix)))
+    boxplot(a.exprs[iix] ~ x[iix], ylab=sprintf("%s expression", names(goi)[i]), sub=sprintf("Kruskal-Walis test p-value = %.1E", kwt$p.value), main=sprintf("%s vs subtypes in %s\n%i patients", names(goi)[i], dataset.name, length(iix)), ylim=yylim)
   }
 }
 dev.off()
@@ -165,7 +167,7 @@ for (ii in 1:length(goi.prolif)) {
               cc <- cor.test(x=a.exprs[myx], y=x[myx], methpd="spearman", conf.level=0.95)
               cc <- list("rho"=cc$estimate, "lower"=cc$conf.in[1], "upper"=cc$conf.in[2], "p"=cc$p.value)
             } else { cc <- list("rho"=NA, "lower"=NA, "upper"=NA, "p"=NA) }
-            plot(x=a.exprs[myx], y=x[myx], ylab=sprintf("%s expression", names(goi.prolif)[ii]), xlab=sprintf("%s expression", names(goi)[i]), cex.main=0.9, main=sprintf("%s vs %s in %s (%s)\n%i patients", names(goi.prolif)[ii], names(goi)[i], names(sbtoi)[j], dataset.name, length(myx)), sub=sprintf("Spearman = %.3g 95%%CI [%.3g, %.3g], p = %.1E", cc$rho, cc$lower, cc$upper, cc$p), pch=20, col="darkgrey")
+            plot(x=a.exprs[myx], y=x[myx], ylab=sprintf("%s expression", names(goi.prolif)[ii]), xlab=sprintf("%s expression", names(goi)[i]), cex.main=0.9, main=sprintf("%s vs %s in %s (%s)\n%i patients", names(goi.prolif)[ii], names(goi)[i], names(sbtoi)[j], dataset.name, length(myx)), sub=sprintf("Spearman = %.3g 95%%CI [%.3g, %.3g], p = %.1E", cc$rho, cc$lower, cc$upper, cc$p), pch=20, col="darkgrey", xlim=yylim, ylim=yylim)
           }
         }
       }
@@ -191,7 +193,7 @@ for (ii in 1:length(bc.signatures)) {
             cc <- cor.test(x=a.exprs[myx], y=x[myx], methpd="spearman", conf.level=0.95)
             cc <- list("rho"=cc$estimate, "lower"=cc$conf.in[1], "upper"=cc$conf.in[2], "p"=cc$p.value)
           } else { cc <- list("rho"=NA, "lower"=NA, "upper"=NA, "p"=NA) }
-          plot(x=a.exprs[myx], y=x[myx], ylab=sprintf("%s score", names(bc.signatures)[ii]), xlab=sprintf("%s expression", names(goi)[i]), cex.main=0.9, main=sprintf("%s vs %s in %s (%s)\n%i patients", names(bc.signatures)[ii], names(goi)[i], names(sbtoi)[j], dataset.name, length(myx)), sub=sprintf("Spearman = %.3g 95%%CI [%.3g, %.3g], p = %.1E", cc$rho, cc$lower, cc$upper, cc$p), pch=20, col="darkgrey")
+          plot(x=a.exprs[myx], y=x[myx], ylab=sprintf("%s score", names(bc.signatures)[ii]), xlab=sprintf("%s expression", names(goi)[i]), cex.main=0.9, main=sprintf("%s vs %s in %s (%s)\n%i patients", names(bc.signatures)[ii], names(goi)[i], names(sbtoi)[j], dataset.name, length(myx)), sub=sprintf("Spearman = %.3g 95%%CI [%.3g, %.3g], p = %.1E", cc$rho, cc$lower, cc$upper, cc$p), pch=20, col="darkgrey", xlim=yylim, ylim=yylim)
         }
       }
     }
@@ -217,7 +219,7 @@ if (sum(complete.cases(x)) >= 3) {
           cc <- cor.test(x=a.exprs[myx], y=x[myx], methpd="spearman", conf.level=0.95)
           cc <- list("rho"=cc$estimate, "lower"=cc$conf.in[1], "upper"=cc$conf.in[2], "p"=cc$p.value)
         } else { cc <- list("rho"=NA, "lower"=NA, "upper"=NA, "p"=NA) }
-        plot(x=a.exprs[myx], y=x[myx], ylab="Age at diagnosis", xlab=sprintf("%s expression", names(goi)[i]), cex.main=0.9, main=sprintf("%s vs %s in %s (%s)\n%i patients", "Age", names(goi)[i], names(sbtoi)[j], dataset.name, length(myx)), sub=sprintf("Spearman = %.3g 95%%CI [%.3g, %.3g], p = %.1E", cc$rho, cc$lower, cc$upper, cc$p), pch=20, col="darkgrey")
+        plot(x=a.exprs[myx], y=x[myx], ylab="Age at diagnosis", xlab=sprintf("%s expression", names(goi)[i]), cex.main=0.9, main=sprintf("%s vs %s in %s (%s)\n%i patients", "Age", names(goi)[i], names(sbtoi)[j], dataset.name, length(myx)), sub=sprintf("Spearman = %.3g 95%%CI [%.3g, %.3g], p = %.1E", cc$rho, cc$lower, cc$upper, cc$p), pch=20, col="darkgrey", xlim=yylim)
       }
     }
   }
@@ -240,7 +242,7 @@ if (sum(complete.cases(x)) >= 3) {
         if(sum(complete.cases(a.exprs[myx], x[myx])) > 3) {
           cc <- cor.test(x=a.exprs[myx], y=x[myx], methpd="spearman", conf.level=0.95)
           cc <- list("rho"=cc$estimate, "lower"=cc$conf.in[1], "upper"=cc$conf.in[2], "p"=cc$p.value)
-          plot(x=a.exprs[myx], y=x[myx], ylab="Tumor size", xlab=sprintf("%s expression", names(goi)[i]), cex.main=0.9, main=sprintf("%s vs %s in %s (%s)\n%i patients", "Tumor size", names(goi)[i], names(sbtoi)[j], dataset.name, length(myx)), sub=sprintf("Spearman = %.3g 95%%CI [%.3g, %.3g], p = %.1E", cc$rho, cc$lower, cc$upper, cc$p), pch=20, col="darkgrey")
+          plot(x=a.exprs[myx], y=x[myx], ylab="Tumor size", xlab=sprintf("%s expression", names(goi)[i]), cex.main=0.9, main=sprintf("%s vs %s in %s (%s)\n%i patients", "Tumor size", names(goi)[i], names(sbtoi)[j], dataset.name, length(myx)), sub=sprintf("Spearman = %.3g 95%%CI [%.3g, %.3g], p = %.1E", cc$rho, cc$lower, cc$upper, cc$p), pch=20, col="darkgrey", xlim=yylim)
         } else { cc <- list("rho"=NA, "lower"=NA, "upper"=NA, "p"=NA) }
       }
     }
@@ -271,7 +273,7 @@ for (i in 1:length(cn)) {
             if (!doplot) { par(mfrow=c(3, ceiling(length(sbtoi) / 3))) }
             doplot <- TRUE
             wt <- kruskal.test(a.exprs[myx] ~ x[myx])
-            boxplot(a.exprs[myx] ~ x[myx], outline=FALSE, ylab=sprintf("%s expression", names(goi)[ii]), xlab=cn[i], cex.main=0.9, main=sprintf("%s vs %s in %s (%s)\n%i patients", cn[i], names(goi)[ii], names(sbtoi)[j], dataset.name, length(myx)), sub=sprintf("Kruskal-Wallis test p-value = %.1E", wt$p.value))
+            boxplot(a.exprs[myx] ~ x[myx], outline=FALSE, ylab=sprintf("%s expression", names(goi)[ii]), xlab=cn[i], cex.main=0.9, main=sprintf("%s vs %s in %s (%s)\n%i patients", cn[i], names(goi)[ii], names(sbtoi)[j], dataset.name, length(myx)), sub=sprintf("Kruskal-Wallis test p-value = %.1E", wt$p.value), ylim=yylim)
             legend("topleft", title=cn[i], legend=sprintf("%s (n=%i)", names(tt), tt), bty="n")
           } else { wt <- list("p.value"=NA) }
         }
@@ -281,7 +283,7 @@ for (i in 1:length(cn)) {
   }
 }
 ## combined boxplot
-pdf(file.path(goidir, sprintf("clin_apobec_exprs_%s.pdf", dataset.name)), height=7, width=ceiling(length(cn)) * 3)
+pdf(file.path(goidir, sprintf("clin_apobec_exprs_%s.pdf", dataset.name)), height=3, width=2.5)
 for (ii in 1:length(goi)) {
 	if (goi[[ii]] %in% colnames(dataset$ge)) {
 	  a.exprs <- dataset$ge[ , goi[[ii]]]
@@ -308,15 +310,76 @@ for (ii in 1:length(goi)) {
 				rr.all <- c(rr.all, list(NA), rr)
 			}
 		}
+		rr.all <- rr.all[-1]
       # wt <- kruskal.test(a.exprs[myx] ~ x[myx])
-		par(xaxt="n", las=1, mar=c(7, 4, 3, 1) + 0.1)
-      mp <- boxplot(rr.all, outline=FALSE, ylab=sprintf("%s expression", names(goi)[ii]), xlab="Clinical parameters", cex.main=0.9, main=sprintf("%s in %s", names(goi)[ii], names(sbtoi)[j]))
+		par(xaxt="n", las=1, mar=c(7, 4, 3, 1) + 0.1, cex=0.7)
+      mp <- boxplot(rr.all, outline=FALSE, ylab=sprintf("%s expression", names(goi)[ii]), xlab="Clinical parameters", cex.main=0.9, main=sprintf("%s in %s", names(goi)[ii], names(sbtoi)[j]), ylim=yylim, col=sbtcol[j])
 	   axis(1, at=seq(1, length(rr.all), by=1), labels=FALSE)
-	   text(x=(1:length(mp$names)) + 0.25, y=par("usr")[3] - (par("usr")[4] * 0.01), pos=2, labels=toupper(mp$names), srt=45, xpd=NA, cex=0.8, font=1)
+	   text(x=(1:length(mp$names)) + 0.25, y=par("usr")[3] - (par("usr")[4] * 0.025), pos=2, labels=toupper(mp$names), srt=45, xpd=NA, cex=0.7, font=1)
 	}
  }
 }
 dev.off()
+
+
+
+
+
+
+## combined boxplot per subtypes
+pdf(file.path(goidir, sprintf("clin3_apobec_exprs_%s.pdf", dataset.name)), height=3, width=9)
+for (ii in 1:length(goi)) {
+	if (goi[[ii]] %in% colnames(dataset$ge)) {
+		a.exprs <- dataset$ge[ , goi[[ii]]]
+		rr.all3 <- mycol3 <- NULL
+		for (i in 1:length(cn)) {
+			x <- dataset$clin[ , cn[i]]
+			x[!is.na(x) & (x == "NA" | x == "")] <- NA
+			if (!is.factor(x)) {
+				x <- factor(x, levels=c(sort(as.character(unique(x)))))
+			}
+			names(x) <- rownames(dataset$clin)
+			rr.all2 <- mycol2 <- NULL
+			for (j in 1:length(sbtoi)) {
+				rr.all <- NULL
+				for (k in 1:length(levels(x))) {
+					iix2 <- names(sbt2)[!is.na(sbt2) & is.element(sbt2, sbtoi[[j]])]
+					iix3 <- names(x)[!is.na(x) & x == levels(x)[k]]
+					myx <- fold(intersect, iix3, iix2, iix)
+					## build a list of data points for each category
+					if (sum(complete.cases(x[myx])) >= 3) {
+						rr <- list(a.exprs[myx])
+						names(rr) <- paste(cn[i], levels(x)[k], names(sbtoi)[j], sep=".")
+					} else {
+						rr <- -1
+					}
+					rr.all <- c(rr.all, rr)
+				}
+				rr.all2 <- c(rr.all2, list(NA), rr.all)
+				mycol2 <- c(mycol2, "white", rep(sbtcol[j], each=length(levels(x))))
+			}
+			rr.all3 <- c(rr.all3, list(NA), rr.all2)
+			mycol3 <- c(mycol3, "white", mycol2)
+		}
+		rr.all3 <- rr.all3[-c(1:2)]
+		mycol3 <- mycol3[-c(1:2)]
+		myx <- sapply(rr.all3, function (x) { return (!(!is.na(x[1]) & x[1] == -1))})
+		rr.all3 <- rr.all3[myx]
+		mycol3 <- mycol3[myx]
+		par(xaxt="n", las=1, mar=c(7, 4, 3, 1) + 0.1, cex=0.7)
+		mp <- boxplot(rr.all3, outline=FALSE, ylab=sprintf("%s expression", names(goi)[ii]), xlab="", cex.main=0.9, main=sprintf("%s", names(goi)[ii]), col=mycol3)
+		axis(1, at=seq(1, length(rr.all3), by=1), labels=FALSE)
+		text(x=(1:length(mp$names)) + 0.25, y=par("usr")[3] - (par("usr")[4] * 0.025), pos=2, labels=toupper(mp$names), srt=45, xpd=NA, cex=0.7, font=1)
+	}
+}
+dev.off()
+
+
+
+
+
+
+
 
 ## association with mutations
 iix <- intersect(rownames(dataset$ge), rownames(mutations))
@@ -339,7 +402,7 @@ for (ii in 1:ncol(mutations)) {
           tt <- tt[names(tt) != ""]
           if(length(tt) > 1 & all(tt > 3)) {
             wt <- kruskal.test(a.exprs[myx] ~ xx[myx])
-            boxplot(a.exprs[myx] ~ xx[myx], outline=FALSE, ylab=sprintf("%s expression", names(goi)[i]), xlab=sprintf("%s mutation status", colnames(mutations)[ii]), cex.main=0.9, main=sprintf("%s mut vs %s in %s\n(%i patients, %s)", colnames(mutations)[ii], names(goi)[i], names(sbtoi)[j], length(myx), dataset.name), sub=sprintf("Kruskal-Wallis test p-value = %.1E", wt$p.value))
+            boxplot(a.exprs[myx] ~ xx[myx], outline=FALSE, ylab=sprintf("%s expression", names(goi)[i]), xlab=sprintf("%s mutation status", colnames(mutations)[ii]), cex.main=0.9, main=sprintf("%s mut vs %s in %s\n(%i patients, %s)", colnames(mutations)[ii], names(goi)[i], names(sbtoi)[j], length(myx), dataset.name), sub=sprintf("Kruskal-Wallis test p-value = %.1E", wt$p.value), ylim=yylim)
             legend("topleft", title=sprintf("%s mut", colnames(mutations)[ii]), legend=sprintf("%s (n=%i)", names(tt), tt), bty="n")
           } else { wt <- list("p.value"=NA) }
         }
@@ -393,15 +456,14 @@ if (length(mutn) > 0) {
 			mycol3 <- mycol3[-c(1:2)]
 			# wt <- kruskal.test(a.exprs[myx] ~ x[myx])
 			par(xaxt="n", las=1, mar=c(7, 4, 3, 1) + 0.1, cex=0.7)
-			mp <- boxplot(rr.all3, outline=FALSE, ylab=sprintf("%s expression", names(goi)[ii]), xlab="", cex.main=0.9, main=sprintf("%s", names(goi)[ii]), col=mycol3)
+			mp <- boxplot(rr.all3, outline=FALSE, ylab=sprintf("%s expression", names(goi)[ii]), xlab="", cex.main=0.9, main=sprintf("%s", names(goi)[ii]), col=mycol3, ylim=yylim)
 			axis(1, at=seq(1, length(rr.all3), by=1), labels=FALSE)
-			text(x=(1:length(mp$names)) + 0.25, y=par("usr")[3] - (par("usr")[4] * 0.01), pos=2, labels=toupper(mp$names), srt=45, xpd=NA, cex=0.7, font=1)
+			text(x=(1:length(mp$names)) + 0.25, y=par("usr")[3] - (par("usr")[4] * 0.025), pos=2, labels=toupper(mp$names), srt=45, xpd=NA, cex=0.7, font=1)
 		}
 	}
 	dev.off()
 
 	## combined boxplot per mutation
-	
 	pdf(file.path(goidir, sprintf("mutations3_apobec_exprs_%s.pdf", dataset.name)), height=3, width=ceiling(length(mutn) * 2.5))
 	for (ii in 1:length(goi)) {
 		if (goi[ii] %in% colnames(dataset$ge)) {
@@ -445,9 +507,9 @@ if (length(mutn) > 0) {
 			mycol3 <- mycol3[myx]
 			# wt <- kruskal.test(a.exprs[myx] ~ x[myx])
 			par(xaxt="n", las=1, mar=c(7, 4, 3, 1) + 0.1, cex=0.7)
-			mp <- boxplot(rr.all3, outline=FALSE, ylab=sprintf("%s expression", names(goi)[ii]), xlab="", cex.main=0.9, main=sprintf("%s", names(goi)[ii]), col=mycol3)
+			mp <- boxplot(rr.all3, outline=FALSE, ylab=sprintf("%s expression", names(goi)[ii]), xlab="", cex.main=0.9, main=sprintf("%s", names(goi)[ii]), col=mycol3, ylim=yylim)
 			axis(1, at=seq(1, length(rr.all3), by=1), labels=FALSE)
-			text(x=(1:length(mp$names)) + 0.25, y=par("usr")[3] - (par("usr")[4] * 0.01), pos=2, labels=toupper(mp$names), srt=45, xpd=NA, cex=0.7, font=1)
+			text(x=(1:length(mp$names)) + 0.25, y=par("usr")[3] - (par("usr")[4] * 0.025), pos=2, labels=toupper(mp$names), srt=45, xpd=NA, cex=0.7, font=1)
 		}
 	}
 	dev.off()
@@ -693,7 +755,7 @@ for (ii in 1:length(goi)) {
 		par(xaxt="n", las=1, mar=c(7, 4, 3, 1) + 0.1, cex=0.7)
 		mp <- boxplot(rr.all2, outline=FALSE, ylab=sprintf("%s expression", names(goi)[ii]), xlab="", cex.main=0.9, main=sprintf("%s", names(goi)[ii]), col=mycol2, ylim=yylim)
 		axis(1, at=seq(1, length(rr.all2), by=1), labels=FALSE)
-		text(x=(1:length(mp$names)) + 0.25, y=par("usr")[3] - (par("usr")[4] * 0.01), pos=2, labels=toupper(mp$names), srt=45, xpd=NA, cex=0.7, font=1)
+		text(x=(1:length(mp$names)) + 0.25, y=par("usr")[3] - (par("usr")[4] * 0.025), pos=2, labels=toupper(mp$names), srt=45, xpd=NA, cex=0.7, font=1)
 	}
 }
 dev.off()
@@ -759,7 +821,7 @@ for (ii in 1:length(goi.prolif)) {
 		par(xaxt="n", las=1, mar=c(7, 4, 3, 1) + 0.1, cex=0.7)
 		mp <- boxplot(rr.all2, outline=FALSE, ylab=sprintf("%s expression", names(goi.prolif)[ii]), xlab="", cex.main=0.9, main=sprintf("%s", names(goi.prolif)[ii]), col=mycol2, ylim=yylim)
 		axis(1, at=seq(1, length(rr.all2), by=1), labels=FALSE)
-		text(x=(1:length(mp$names)) + 0.25, y=par("usr")[3] - (par("usr")[4] * 0.01), pos=2, labels=toupper(mp$names), srt=45, xpd=NA, cex=0.7, font=1)
+		text(x=(1:length(mp$names)) + 0.25, y=par("usr")[3] - (par("usr")[4] * 0.025), pos=2, labels=toupper(mp$names), srt=45, xpd=NA, cex=0.7, font=1)
 	}
 }
 dev.off()
@@ -823,7 +885,7 @@ for (ii in 1:length(bc.signatures)) {
 	par(xaxt="n", las=1, mar=c(7, 4, 3, 1) + 0.1, cex=0.7)
 	mp <- boxplot(rr.all2, outline=FALSE, ylab=sprintf("%s expression", names(bc.signatures)[ii]), xlab="", cex.main=0.9, main=sprintf("%s", names(bc.signatures)[ii]), col=mycol2)
 	axis(1, at=seq(1, length(rr.all2), by=1), labels=FALSE)
-	text(x=(1:length(mp$names)) + 0.25, y=par("usr")[3] - (par("usr")[4] * 0.01), pos=2, labels=toupper(mp$names), srt=45, xpd=NA, cex=0.7, font=1)
+	text(x=(1:length(mp$names)) + 0.25, y=par("usr")[3] - (par("usr")[4] * 0.025), pos=2, labels=toupper(mp$names), srt=45, xpd=NA, cex=0.7, font=1)
 }
 dev.off()
 
