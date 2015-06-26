@@ -10,9 +10,9 @@
 
 ## install devel version of MetaGx and PharmacGx
 # library(devtools)
-# install_github("survcomp", username="bhaibeka", ref="master")
-# install_github("genefu", username="bhaibeka", ref="master")
-# install_github("MetaGx", username="bhaibeka", ref="master")
+# devtools::install_github("bhklab/survcomp", ref="master")
+# devtools::install_github("bhklab/genefu", ref="master")
+# devtools::install_github("bhklab/MetaGx", ref="master")
 
 library(parallel)
 library(Biobase)
